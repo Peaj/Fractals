@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Fractals</title>
+		<link rel="stylesheet" type="text/css" href="css/main.css" />
+		<script type="text/javascript" src="js/jquery/jquery-2.1.4.js"></script>
+		<script type="text/javascript" src="js/jquery/jcanvas.min.js"></script>
+		<script type="text/javascript">
+		
+			var width = 500;
+			var height = 500;
+			
+			var intervalID = -1;
+			
+			var iterations = 0;
+			var pos = {x:0,y:0};
+			
+			var ifs = [];
+			
+			var colors = [];
+			colors[0] = "#FF0000";
+			colors[1] = "#00FF00";
+			colors[2] = "#0000FF";
+			colors[3] = "#FFFF00";
+			colors[4] = "#00FFFF";
+			colors[5] = "#FF00FF";
+			
+			function randomRange(min,max)
+			{
+				return Math.floor(Math.random()*(max-min+1)+min);
+			}
+			
+			function uniformToCanvasSpace(vector)
+			{
+				return {x:(vector.x * width), y:((1-vector.y) * height)} 
+			}
+			
+			function iteratedFunction(ifs,pos)
+			{
+				var xOffset = (pos.x-ifs.fixed.x);
+				var yOffset = (pos.y-ifs.fixed.y);
+			
+				var result = {
+					x: ifs.scale * (Math.cos(ifs.angle) * xOffset - Math.sin(ifs.angle) * yOffset) + ifs.fixed.x,
+					y: ifs.scale * (Math.sin(ifs.angle) * xOffset + Math.cos(ifs.angle) * yOffset)  + ifs.fixed.y
+				}
+				return result;
+			}
+			
+			function drawDot(pos, color)
+			{
+				var p = uniformToCanvasSpace(pos)
+				$('#fractal').drawRect({
+					fillStyle: color,
+					x: p.x,
+					y: p.y,
+					width: 1,
+					height: 1
+				});
+			}
+			
+			function iterate(steps)
+			{
+				for(var i = 0; i<steps; i++)
+				{
+					var rnd = Math.floor(Math.random()*ifs.length);
+					pos = iteratedFunction(ifs[rnd],pos);
+					drawDot(pos, ifs[rnd].color);
+					iterations++;
+				}
+				$('#iterations').text(iterations);
+			}
+			
+			function updateIFSData()
+			{
+				ifs = [];
+				$('.function').each(function()
+				{
+					ifs.push({
+						fixed: {
+							x: parseFloat($(this).find('.x').val()),
+							y: parseFloat($(this).find('.y').val())
+						},
+						scale: parseFloat($(this).find('.scale').val()),
+						angle: parseFloat($(this).find('.rotation').val()),
+						color: $(this).find('.color').val()
+					});
+				});
+				
+				console.log("Updata data: "+ifs.length);
+				
+				updateURL();
+				drawFixPoints();
+			}
+			
+			function getIFSDataFromURL()
+			{
+				var s = window.location.search.substring(1).split('&');
+				if(!s.length) return;
+				window.$_GET = {};
+
+				for(var i  = 0; i < s.length; i++) {
+					var parts = s[i].split('=');
+					window.$_GET[unescape(parts[0])] = unescape(parts[1]);
+				}
+				
+				var count = $_GET["l"];
+				if (typeof count === "undefined") count = 0;
+				
+				for(var i=0; i<count; ++i)
+				{
+					ifs[i] = {
+						scale: $_GET["s"+i],
+						angle: $_GET["a"+i],
+						color: '#'+$_GET["c"+i],
+						fixed: {
+							x: $_GET["x"+i],
+							y: $_GET["y"+i]
+						}
+					};
+				}
+				updateForm();
+			}
+			
+			function updateForm()
+			{
+				if(ifs.length <= 0) return;
+				for(var i=functionCount; i<ifs.length; ++i)
+				{
+					var template = $('.function[index=0]').clone();
+					template.attr('index',functionCount).appendTo('#functions');
+					template.find('.color').val(colors[functionCount%colors.length]);
+					functionCount++;
+				}
+				
+				var i=0;
+				$('.function').each(function()
+				{
+					$(this).find('.x').val(parseFloat(ifs[i].fixed.x)),
+					$(this).find('.y').val(parseFloat(ifs[i].fixed.y))
+					$(this).find('.scale').val(parseFloat(ifs[i].scale)),
+					$(this).find('.rotation').val(parseFloat(ifs[i].angle)),
+					$(this).find('.color').val(ifs[i].color)
+					++i;
+				});
+			}
+			
+			function updateURL()
+			{
+				var url = "?l="+ifs.length;
+				for(var i=0; i<ifs.length; ++i)
+				{
+					url += "&"+
+					"s"+i+"="+encodeURI(ifs[i].scale)+"&"+
+					"a"+i+"="+encodeURI(ifs[i].angle)+"&"+
+					"x"+i+"="+encodeURI(ifs[i].fixed.x)+"&"+
+					"y"+i+"="+encodeURI(ifs[i].fixed.y)+"&"+
+					"c"+i+"="+encodeURI(ifs[i].color.substr(1,6));
+				}
+				window.history.pushState({}, '', "index.html"+url);
+				//window.location.search = url;
+			}
+			
+			function drawFixPoints()
+			{
+				$('#fixpoints').clearCanvas();
+				for(var i=0; i<ifs.length; ++i)
+				{
+					var p = uniformToCanvasSpace({x:ifs[i].fixed.x, y: ifs[i].fixed.y})
+					$('#fixpoints').drawRect({
+						fillStyle: ifs[i].color,
+						x: p.x,
+						y: p.y,
+						width: 9,
+						height: 9
+					});
+				}
+			}
+			
+			function start()
+			{
+				updateIFSData();
+				var fps = 60;
+				var steps = $("#steps").val();
+				//console.log("FPS: "+fps);
+				clearInterval(intervalID);
+				if(!playing)
+				{
+					intervalID = setInterval(iterate,1000/fps,steps/fps);
+					playing = true;
+					$(this).css('background-image', 'url("./img/pause.svg")');
+				}
+				else
+				{
+					playing = false;
+					$(this).css('background-image', 'url("./img/play.svg")');
+				}
+				$('#iterations').text(iterations);
+			}
+			
+			function add()
+			{
+				var template = $('.function[index=0]').clone();
+				template.attr('index',functionCount).appendTo('#functions');
+				template.find('.color').val(colors[functionCount%colors.length]);
+				functionCount++;
+				updateIFSData();
+			}
+			
+			function remove()
+			{
+				if(functionCount <= 1) return;
+				$('.function').last().remove();
+				functionCount--;
+				updateIFSData();
+			}
+			
+			function clear()
+			{
+				clearInterval(intervalID);
+				playing = false;
+				$('#startButton').css('background-image', 'url("./img/play.svg")');
+				$('#fractal').clearCanvas();
+				iterations = 0;
+				$('#iterations').text(iterations);
+			}
+			
+			function updateLayers()
+			{
+				if($("#showGrid").prop("checked")) $("#grid").show();
+				else $("#grid").hide();
+				
+				if($("#showFixpoints").prop("checked")) $("#fixpoints").show();
+				else $("#fixpoints").hide();
+			}
+			
+			function drawGrid()
+			{
+				$('#grid').clearCanvas();
+				for(var i=0; i<10; ++i)
+				{
+					var alpha = (1/(1+i%2))-0.4;
+					var pos = i/10;
+					drawHorizontalLine(pos,'rgba(0,0,0,'+alpha+')');
+					drawVerticalLine(pos, 'rgba(0,0,0,'+alpha+')');
+				}
+			}
+			
+			function drawHorizontalLine(val, color)
+			{
+				var start = uniformToCanvasSpace({x:0, y: val})
+				var end = uniformToCanvasSpace({x:1, y: val})
+				drawUniformLine(start,end,color);
+			}
+			
+			function drawVerticalLine(val,color)
+			{
+				var start = uniformToCanvasSpace({x:val, y: 0})
+				var end = uniformToCanvasSpace({x:val, y: 1})
+				drawUniformLine(start,end,color);
+			}
+			
+			function drawUniformLine(start, end, color)
+			{
+				$('#grid').drawLine({
+					strokeStyle: color,
+					strokeWidth: 2,
+					x1: start.x, y1: start.y,
+					x2: end.x, y2: end.y
+				});
+			}
+			
+			var playing = false;
+			var functionCount = 1;
+			
+			$(document).ready(function () {
+				getIFSDataFromURL();
+				updateIFSData();
+				updateLayers();
+				drawGrid();
+				
+				$('#settings').on("change", "input", updateIFSData);
+				$('#functions').on("change", "input", updateIFSData);
+				$('#info').on("change", "input", updateLayers);
+				
+				$('#startButton').click(start);
+				$('#clearButton').click(clear);
+				$('#addFunc').click(add);
+				$('#removeFunc').click(remove);
+			});
+		</script>
+	</head>
+	<body>
+		<div id='result'>
+			<div id='multicanvas'>
+				<canvas id='fractal' width='500' height='500'></canvas>
+				<canvas id='fixpoints' width='500' height='500'></canvas>
+				<canvas id='grid' width='500' height='500'></canvas>
+			</div>
+			<div id='info'>
+				<label>Iterations: </label></span><span id='iterations'>0</span>
+				<span style='float:right'>
+					<input id='showFixpoints' type='checkbox'> Fixpoints</input>
+					<input id='showGrid' type='checkbox'> Grid</input>
+				</span>
+			</div>
+		</div>
+		<div id='settings'>
+			<button id='clearButton'></button>
+			<button id='startButton'></button>
+			<label>Iterations/s</label>
+			<input id='steps' class='compact' type='number' value='10000'></input>
+			
+			<button id='addFunc'></button>
+			<button id='removeFunc'></button>
+			
+			<!--<div style='clear both'></div>-->
+		</div>
+		
+		<div id='functions'>
+			<div class='function' index='0'>
+				<input type='color' class='color compact' value='#FF0000'></input>
+				<label>Scale:</label>
+				<input class='scale compact' type='text' value='1'></input>
+				<label>Angle:</label>
+				<input class='rotation compact' type='text' value='0'></input>
+				<label>Point:</label>
+				<input class='x compact' type='text' value='1'></input>
+				<input class='y compact' type='text' value='1'></input>
+			</div>
+		</div>
+		
+	</body>
+</html>

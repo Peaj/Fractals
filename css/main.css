@@ -1,0 +1,181 @@
+*
+{
+	margin: 0;
+	padding: 0;
+	font-family: verdana;
+}
+
+body
+{
+	background-color: #2d2d30;
+	color: #f1f1f1;
+}
+
+@media only screen and (max-width: 600px) {
+	html {
+		overflow: auto;
+		width: 500px;
+	}
+}
+
+input.compact
+{
+	background-color: #333337;
+    border: 0 none;
+    color: #f1f1f1;
+    font-size: 2em;
+    height: 50px;
+    text-align: center;
+    vertical-align: bottom;
+    width: 60px;
+}
+
+button
+{
+	min-width: 50px;
+	height: 50px;
+	background-repeat:	no-repeat;
+	background-position: center center;
+	background-size: 30px 30px;
+	background-color: #007acc;
+	border: 0px none;
+	filter: invert;
+}
+
+button:hover
+{
+	background-color: #59a8de;
+	cursor: pointer;
+}
+
+#clearButton
+{
+	background-image: url("./../img/stop.svg");	
+}
+
+#startButton
+{
+	background-image: url("./../img/play.svg");
+}
+
+#addFunc
+{
+	background-image: url("./../img/plus.svg");
+}
+
+#removeFunc
+{
+	background-image: url("./../img/minus.svg");
+}
+
+#multicanvas
+{
+	position: relative;
+	width: 500px;
+	height: 500px;
+	background-color: #ffffff;
+}
+
+#fractal
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+}
+
+#fixpoints
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1;
+}
+
+#grid
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 0;
+}
+
+#settings
+{
+	float: left;
+    margin: 10px;
+    width: 500px;
+	vertical-align: middle;
+}
+
+#functions
+{
+	float: left;
+    margin: 0 10px;
+    width: 500px;
+}
+
+#result
+{
+	float: left;
+    margin: 10px;
+    width: 500px;
+	margin-bottom: 0;
+}
+
+#steps
+{
+	width: 170px;
+}
+
+#info
+{
+	background-color: #68217a;
+    margin: 10px 0 0;
+    padding: 5px;
+    vertical-align: middle;
+    width: 490px;
+}
+
+.vertical
+{
+	display: inline-block;
+    font-size: 1em;
+}
+
+.vector input
+{
+	width: 40px;
+	float: left;
+	clear: left;
+	text-align: right;
+}
+
+.function
+{
+	background-color: #252526;
+    border: 1px solid #007acc;
+    clear: left;
+    display: table;
+    float: left;
+    margin: 0 0 11px;
+    padding: 3px 0;
+    width: 100%;
+}
+
+.function input, .function label, .function .vector
+{
+	display: block;
+	margin: 2px;
+	float: left;
+	line-height: 50px;
+}
+
+.function .color
+{
+	background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
+    border: 0 none;
+    margin-left: 5px;
+    padding: 0;
+    vertical-align: middle;
+}
