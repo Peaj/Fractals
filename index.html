@@ -193,12 +193,12 @@
 				{
 					intervalID = setInterval(iterate,1000/fps,steps/fps);
 					playing = true;
-					$(this).css('background-image', 'url("./img/pause.svg")');
+					$('#startButton').css('background-image', 'url("./img/pause.svg")');
 				}
 				else
 				{
 					playing = false;
-					$(this).css('background-image', 'url("./img/play.svg")');
+					$('#startButton').css('background-image', 'url("./img/play.svg")');
 				}
 				$('#iterations').text(iterations);
 			}
