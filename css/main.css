@@ -93,29 +93,6 @@ button:hover
 	z-index: 0;
 }
 
-#settings
-{
-	float: left;
-    margin: 10px;
-    width: 500px;
-	vertical-align: middle;
-}
-
-#functions
-{
-	float: left;
-    margin: 0 10px;
-    width: 500px;
-}
-
-#result
-{
-	float: left;
-    margin: 10px;
-    width: 500px;
-	margin-bottom: 0;
-}
-
 #steps
 {
 	width: 170px;
@@ -128,6 +105,13 @@ button:hover
     padding: 5px;
     vertical-align: middle;
     width: 490px;
+}
+
+.section
+{
+	float: left;
+	margin: 10px 10px 0px 10px;
+	width: 500px;
 }
 
 .vertical
