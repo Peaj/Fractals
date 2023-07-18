@@ -94,17 +94,20 @@
 				drawFixPoints();
 			}
 			
-			function getIFSDataFromURL()
+			function getGetDataFromURL()
 			{
 				var s = window.location.search.substring(1).split('&');
 				if(!s.length) return;
-				window.$_GET = {};
+				$_GET = {};
 
 				for(var i  = 0; i < s.length; i++) {
 					var parts = s[i].split('=');
-					window.$_GET[unescape(parts[0])] = unescape(parts[1]);
+					$_GET[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
 				}
-				
+			}
+
+			function getIFSDataFromGet()
+			{
 				var count = $_GET["l"];
 				if (typeof count === "undefined") count = 0;
 				
@@ -275,7 +278,8 @@
 			var functionCount = 1;
 			
 			$(document).ready(function () {
-				getIFSDataFromURL();
+				getGetDataFromURL();
+				getIFSDataFromGet();
 				updateIFSData();
 				updateLayers();
 				drawGrid();
@@ -288,6 +292,8 @@
 				$('#clearButton').click(clear);
 				$('#addFunc').click(add);
 				$('#removeFunc').click(remove);
+
+				if($_GET["autoplay"]) start();
 			});
 		</script>
 	</head>
